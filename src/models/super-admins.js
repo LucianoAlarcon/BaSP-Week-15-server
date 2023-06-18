@@ -15,12 +15,6 @@ const superAdminsSchema = new Schema({
     maxLength: 25,
     required: true,
   },
-  password: {
-    type: String,
-    minLength: 8,
-    maxLength: 16,
-    required: true,
-  },
 });
 
 module.exports = mongoose.model('SuperAdmin', superAdminsSchema);

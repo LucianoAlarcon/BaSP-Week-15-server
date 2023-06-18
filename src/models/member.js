@@ -33,12 +33,6 @@ const membersSchema = new Schema({
     maxLength: 25,
     required: true,
   },
-  password: {
-    type: String,
-    minLength: 8,
-    maxLength: 20,
-    required: true,
-  },
   city: {
     type: String,
     minLength: 4,

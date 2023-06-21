@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const Subscription = require('../models/subscription');
+import mongoose from 'mongoose';
+import Subscription from '../models/subscription';
 
 const getAllSubscriptions = (req, res) => {
   Subscription.find()
@@ -161,7 +161,7 @@ const deleteSubscription = (req, res) => {
     .catch((error) => applyResponse(res, 500, error.message, undefined, true));
 };
 
-module.exports = {
+export default {
   updateSubscription,
   deleteSubscription,
   getAllSubscriptions,

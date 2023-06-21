@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const { Schema } = mongoose;
 
@@ -22,4 +22,4 @@ const activitySchema = new Schema({
   },
 });
 
-module.exports = mongoose.model('Activity', activitySchema);
+export default mongoose.model('Activity', activitySchema);

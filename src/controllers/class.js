@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const Class = require('../models/class');
+import mongoose from 'mongoose';
+import Class from '../models/class';
 
 const updateClass = async (req, res) => {
   const { id } = req.params;
@@ -189,7 +189,7 @@ const createClass = (req, res) => {
     }));
 };
 
-module.exports = {
+export default {
   getAllClasses,
   getClassId,
   createClass,

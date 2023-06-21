@@ -1,6 +1,6 @@
-const express = require('express');
-const trainersController = require('../controllers/trainer');
-const validations = require('../validations/trainer');
+import express from 'express';
+import trainersController from '../controllers/trainer';
+import validations from '../validations/trainer';
 
 const router = express.Router();
 
@@ -11,4 +11,4 @@ router
   .put('/:id', validations.validateUpdate, trainersController.updateTrainers)
   .delete('/:id', trainersController.deleteTrainers);
 
-module.exports = router;
+export default router;

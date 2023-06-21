@@ -1,5 +1,6 @@
-const { default: mongoose } = require('mongoose');
-const Admin = require('../models/admins');
+import mongoose from 'mongoose';
+import Admin from '../models/admins';
+import firebaseApp from '../helper/firebase';
 
 const getAllAdmins = (req, res) => {
   Admin.find()
@@ -65,6 +66,9 @@ const createAdmin = async (req, res) => {
     city,
     password,
   } = req.body;
+
+  let firebaseUid;
+
   const alreadyExists = await Admin.findOne({ $or: [{ dni }, { email }] });
   if (alreadyExists) {
     return res.status(400).json({
@@ -73,7 +77,17 @@ const createAdmin = async (req, res) => {
       error: true,
     });
   }
+
+  const newFirebaseUser = await firebaseApp.auth().createUser({
+    email: req.body.email,
+    password: req.body.password,
+  });
+  firebaseUid = newFirebaseUser.uid;
+
+  await firebaseApp.auth().setCustomUserClaims(newFirebaseUser.uid, { role: 'ADMIN' });
+
   return Admin.create({
+    firebaseUid,
     firstName,
     lastName,
     dni,
@@ -206,7 +220,7 @@ const deleteAdmin = (req, res) => {
     }));
 };
 
-module.exports = {
+export default {
   updateAdmin,
   deleteAdmin,
   getAllAdmins,

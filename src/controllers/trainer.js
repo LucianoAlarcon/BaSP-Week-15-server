@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const Trainer = require('../models/trainer');
+import mongoose from 'mongoose';
+import Trainer from '../models/trainer';
 
 const getAllTrainers = (req, res) => {
   Trainer.find()
@@ -165,7 +165,7 @@ const deleteTrainers = (req, res) => {
     }));
 };
 
-module.exports = {
+export default {
   getAllTrainers,
   getTrainerById,
   createTrainer,

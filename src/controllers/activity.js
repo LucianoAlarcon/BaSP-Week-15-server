@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const Activity = require('../models/activity');
+import mongoose from 'mongoose';
+import Activity from '../models/activity';
 
 const getAllActivities = (req, res) => {
   Activity.find()
@@ -129,7 +129,7 @@ const deleteActivities = (req, res) => {
     });
 };
 
-module.exports = {
+export default {
   getAllActivities,
   getActivitiesById,
   createActivities,

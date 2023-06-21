@@ -1,5 +1,6 @@
-const mongoose = require('mongoose');
-const SuperAdmin = require('../models/super-admins');
+import mongoose from 'mongoose';
+import SuperAdmin from '../models/super-admins';
+import firebaseApp from '../helper/firebase';
 
 const getAllSuperAdmins = (req, res) => {
   SuperAdmin.find()
@@ -50,6 +51,7 @@ const getSuperAdminsById = (req, res) => {
 
 const createSuperAdmins = async (req, res) => {
   const { firstName, email, password } = req.body;
+  let firebaseUid;
 
   try {
     const existingSuperAdmin = await SuperAdmin.findOne({ email });
@@ -61,7 +63,17 @@ const createSuperAdmins = async (req, res) => {
       });
     }
 
+    const newFirebaseUser = await firebaseApp.auth().createUser({
+      email: req.body.email,
+      password: req.body.password,
+    });
+
+    firebaseUid = newFirebaseUser.uid;
+
+    await firebaseApp.auth().setCustomUserClaims(newFirebaseUser.uid, { role: 'SUPER_ADMIN' });
+
     const result = await SuperAdmin.create({
+      firebaseUid,
       firstName,
       email,
       password,
@@ -113,7 +125,7 @@ const updateSuperAdmin = (req, res) => {
       return SuperAdmin.findOne({ email })
         .then((repeatedMail) => {
           if ((repeatedMail)
-          && (Object.values(repeatedMail.toObject())[0].toString() !== id)) {
+            && (Object.values(repeatedMail.toObject())[0].toString() !== id)) {
             return applyResponse(res, 404, 'Email already exists', undefined, true);
           }
           return SuperAdmin.findByIdAndUpdate(
@@ -152,7 +164,7 @@ const deleteSuperAdmin = (req, res) => {
     .catch((error) => applyResponse(res, 500, error.message, undefined, true));
 };
 
-module.exports = {
+export default {
   getAllSuperAdmins,
   getSuperAdminsById,
   createSuperAdmins,

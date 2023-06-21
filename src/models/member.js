@@ -1,8 +1,12 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const { Schema } = mongoose;
 
 const membersSchema = new Schema({
+  firebaseUid: {
+    type: String,
+    required: true,
+  },
   firstName: {
     type: String,
     minLength: 3,
@@ -33,12 +37,6 @@ const membersSchema = new Schema({
     maxLength: 25,
     required: true,
   },
-  password: {
-    type: String,
-    minLength: 8,
-    maxLength: 20,
-    required: true,
-  },
   city: {
     type: String,
     minLength: 4,
@@ -66,4 +64,4 @@ const membersSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model('Member', membersSchema);
+export default mongoose.model('Member', membersSchema);

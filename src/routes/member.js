@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 
-const memberController = require('../controllers/member');
-const validateMember = require('../validations/member');
+import memberController from '../controllers/member';
+import validateMember from '../validations/member';
 
 const router = express.Router();
 
@@ -10,6 +10,6 @@ router
   .delete('/:id', memberController.deleteMember)
   .get('/', memberController.getAllMembers)
   .get('/:id', memberController.getMembersById)
-  .post('/', validateMember.validateMembersCreation, memberController.createMembers);
+  .post('/', memberController.createMembers);
 
-module.exports = router;
+export default router;

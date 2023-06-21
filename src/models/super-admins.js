@@ -1,8 +1,12 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const { Schema } = mongoose;
 
 const superAdminsSchema = new Schema({
+  firebaseUid: {
+    type: String,
+    required: true,
+  },
   firstName: {
     type: String,
     minLength: 3,
@@ -23,4 +27,4 @@ const superAdminsSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model('SuperAdmin', superAdminsSchema);
+export default mongoose.model('SuperAdmin', superAdminsSchema);

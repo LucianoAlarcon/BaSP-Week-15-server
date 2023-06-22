@@ -8,14 +8,15 @@ import {
   deleteAdmin,
   updateAdmin,
 } from '../controllers/admins';
+import checkAuth from '../middlewares/authMiddleware';
 
 const router = express.Router();
 
 router
-  .get('/', getAllAdmins)
-  .get('/:id', getAdminById)
-  .post('/', validateCreate, createAdmin)
-  .put('/:id', validateUpdate, updateAdmin)
-  .delete('/:id', deleteAdmin);
+  .get('/', checkAuth(['SUPER_ADMIN']), getAllAdmins)
+  .get('/:id', checkAuth(['SUPER_ADMIN']), getAdminById)
+  .post('/', checkAuth(['SUPER_ADMIN']), validateCreate, createAdmin)
+  .put('/:id', checkAuth(['SUPER_ADMIN']), validateUpdate, updateAdmin)
+  .delete('/:id', checkAuth(['SUPER_ADMIN']), deleteAdmin);
 
 module.exports = router;

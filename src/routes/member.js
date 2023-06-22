@@ -1,15 +1,16 @@
-const express = require('express');
+import express from 'express';
 
-const memberController = require('../controllers/member');
-const validateMember = require('../validations/member');
+import memberController from '../controllers/member';
+import validateMember from '../validations/member';
+import checkAuth from '../middlewares/authMiddleware';
 
 const router = express.Router();
 
 router
-  .put('/:id', validateMember.validateMembersUpdate, memberController.updateMember)
-  .delete('/:id', memberController.deleteMember)
-  .get('/', memberController.getAllMembers)
-  .get('/:id', memberController.getMembersById)
+  .put('/:id', checkAuth(['SUPER_ADMIN', 'ADMIN', 'MEMBER']), validateMember.validateMembersUpdate, memberController.updateMember)
+  .delete('/:id', checkAuth(['SUPER_ADMIN', 'ADMIN']), memberController.deleteMember)
+  .get('/', checkAuth(['SUPER_ADMIN', 'ADMIN']), memberController.getAllMembers)
+  .get('/:id', checkAuth(['SUPER_ADMIN', 'ADMIN', 'MEMBER']), memberController.getMembersById)
   .post('/', validateMember.validateMembersCreation, memberController.createMembers);
 
 module.exports = router;

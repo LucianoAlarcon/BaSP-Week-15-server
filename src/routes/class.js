@@ -1,14 +1,16 @@
-const express = require('express');
-const classController = require('../controllers/class');
-const validations = require('../validations/class');
+import express from 'express';
+import classController from '../controllers/class';
+import validations from '../validations/class';
+import checkAuth from '../middlewares/authMiddleware';
+
 
 const router = express.Router();
 
 router
-  .put('/:id', validations.validationUpdateClass, classController.updateClass)
-  .delete('/:id', classController.deleteClass)
-  .get('/', classController.getAllClasses)
-  .get('/:id', classController.getClassId)
-  .post('/', validations.validateCreation, classController.createClass);
+  .put('/:id', checkAuth(['SUPER_ADMIN', 'ADMIN', 'TRAINER', 'MEMBER']), validations.validationUpdateClass, classController.updateClass)
+  .delete('/:id', checkAuth(['SUPER_ADMIN', 'ADMIN']), classController.deleteClass)
+  .get('/', checkAuth(['SUPER_ADMIN', 'ADMIN', 'TRAINER', 'MEMBER']), classController.getAllClasses)
+  .get('/:id', checkAuth(['SUPER_ADMIN', 'ADMIN', 'TRAINER', 'MEMBER']), classController.getClassId)
+  .post('/', checkAuth(['SUPER_ADMIN', 'ADMIN']), validations.validateCreation, classController.createClass);
 
 module.exports = router;

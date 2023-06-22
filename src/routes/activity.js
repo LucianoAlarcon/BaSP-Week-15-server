@@ -1,14 +1,15 @@
-const express = require('express');
-const activitiesController = require('../controllers/activity');
-const validations = require('../validations/activity');
+import express from 'express';
+import activitiesController from '../controllers/activity';
+import validations from '../validations/activity';
+import checkAuth from '../middlewares/authMiddleware';
 
 const router = express.Router();
 
 router
-  .get('/', activitiesController.getAllActivities)
-  .get('/:id', activitiesController.getActivitiesById)
-  .post('/', validations.validateCreation, activitiesController.createActivities)
-  .put('/:id', validations.validateUpdate, activitiesController.updateActivities)
-  .delete('/:id', activitiesController.deleteActivities);
+  .get('/', checkAuth(['SUPER_ADMIN', 'ADMIN', 'TRAINER', 'MEMBER']), activitiesController.getAllActivities)
+  .get('/:id', checkAuth(['SUPER_ADMIN', 'ADMIN', 'TRAINER', 'MEMBER']), activitiesController.getActivitiesById)
+  .post('/', checkAuth(['SUPER_ADMIN', 'ADMIN']), validations.validateCreation, activitiesController.createActivities)
+  .put('/:id', checkAuth(['SUPER_ADMIN', 'ADMIN', 'TRAINER', 'MEMBER']), validations.validateUpdate, activitiesController.updateActivities)
+  .delete('/:id', checkAuth(['SUPER_ADMIN', 'ADMIN']), activitiesController.deleteActivities);
 
 module.exports = router;

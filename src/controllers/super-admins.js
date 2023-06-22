@@ -1,5 +1,7 @@
-const mongoose = require('mongoose');
-const SuperAdmin = require('../models/super-admins');
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
+import SuperAdmin from '../models/super-admins';
+import User from '../models/user';
 
 const getAllSuperAdmins = (req, res) => {
   SuperAdmin.find()
@@ -61,15 +63,25 @@ const createSuperAdmins = async (req, res) => {
       });
     }
 
-    const result = await SuperAdmin.create({
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newSuperAdmin = new SuperAdmin({
       firstName,
       email,
-      password,
     });
 
+    const superAdmin = await newSuperAdmin.save();
+
+    const newUser = new User({
+      email: req.body.email,
+      password: hashedPassword,
+      role: 'SUPER_ADMIN',
+      token: '',
+    });
+
+    await newUser.save();
     return res.status(201).json({
       message: 'Super Admin Created!',
-      data: result,
+      data: superAdmin,
       error: false,
     });
   } catch (error) {

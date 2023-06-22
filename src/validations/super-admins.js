@@ -1,4 +1,4 @@
-const Joi = require('joi');
+import Joi from'joi';
 
 const validateSuperAdminsCreation = (req, res, next) => {
   const superAdminsValidation = Joi.object({
@@ -16,15 +16,17 @@ const validateSuperAdminsCreation = (req, res, next) => {
         'any.required': 'Email is required.',
         'string.empty': 'Email is required.',
       }),
-    password: Joi.string().min(8).max(16).regex(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#%^&*<>_?\-¿¡])/)
-      .label('Password')
-      .required()
+      password: Joi
+      .string()
+      .trim()
+      .min(8)
+      .max(20)
+      .regex(/^(?=\w*\d)(?=\w*[A-Z])(?=\w*[a-z])/)
       .messages({
-        'string.pattern.base': 'Password must have at least 1 special character ( <, >, @, #, ^, %, *, _, -, ?, ¿, ¡, ! ) 1 uppercase letter, 1 lowercase letter and 1 number',
-        'any.required': 'Password is required.',
-        'string.empty': 'Password is required.',
-      }),
-  });
+        'string.empty': 'the password can not be empty',
+        'string.min': 'the password is too short',
+        'string.pattern.base': 'Password must contain at least 1 number, 1 uppercase letter, and 1 lowercase letter',
+      }),  });
 
   const validation = superAdminsValidation.validate(req.body);
 

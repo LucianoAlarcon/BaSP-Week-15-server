@@ -1,32 +1,19 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import Users from '../models/Users';
+import User from '../models/user';
 import APIError from '../utils/APIError';
 
-export const register = async (req, res) => {
-  try {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    const userCreated = new Users({
-      email: req.body.email,
-      password: hashedPassword,
-    });
-    const userSaved = await userCreated.save();
-    return res.status(201).json({
-      message: 'User created',
-      data: userSaved,
-    });
-  } catch (error) {
-    return res.status(400).json({ message: error.toString() });
-  }
-};
-
 export const login = async (req, res) => {
+  const {
+    email,
+    password
+  } = req.body;
   try {
-    const user = await Users.findOne({ email: req.body.email });
+    const user = await User.findOne({ email });
     if (!user) {
       throw new Error('Invalid user credentials');
     }
-    const match = await bcrypt.compare(req.body.password, user.password);
+    const match = await bcrypt.compare(password, user.password);
     if (match) {
       const token = jwt.sign(
         {
@@ -42,7 +29,7 @@ export const login = async (req, res) => {
           expiresIn: '1d',
         },
       );
-      const updatedUser = await Users.findOneAndUpdate(
+      const updatedUser = await User.findOneAndUpdate(
         { email: req.body.email },
         { token },
         { new: true },
@@ -73,14 +60,14 @@ export const login = async (req, res) => {
 export const logout = async (req, res) => {
   try {
     const decoded = await jwt.verify(req.headers.token, process.env.JWT_KEY);
-    const user = await Users.findById(decoded.userId);
+    const user = await User.findById(decoded.userId);
     if (!user) {
       throw new APIError({
         message: 'Invalid user credentials',
         status: 400,
       });
     }
-    const updatedUser = await Users.findByIdAndUpdate(
+    const updatedUser = await User.findByIdAndUpdate(
       decoded.userId,
       { token: '' },
       { new: true },
@@ -98,5 +85,22 @@ export const logout = async (req, res) => {
       message: error.message || error,
       error: true,
     });
+  }
+};
+
+export const register = async (req, res) => {
+  try {
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const userCreated = new User({
+      email: req.body.email,
+      password: hashedPassword,
+    });
+    const userSaved = await userCreated.save();
+    return res.status(201).json({
+      message: 'User created',
+      data: userSaved,
+    });
+  } catch (error) {
+    return res.status(400).json({ message: error.toString() });
   }
 };

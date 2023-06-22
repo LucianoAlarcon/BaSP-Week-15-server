@@ -1,13 +1,10 @@
-const { default: mongoose } = require('mongoose');
-// const Admin = require('../models/admins');
-// const User = require('../models/user')
-// const bcrypt = require('bcrypt')
+import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import Admin from '../models/admins';
 import User from '../models/user';
 
 
-const getAllAdmins = (req, res) => {
+export const getAllAdmins = (req, res) => {
   Admin.find()
     .then((adminsList) => {
       if (adminsList.length === 0) {
@@ -30,7 +27,7 @@ const getAllAdmins = (req, res) => {
     }));
 };
 
-const getAdminById = (req, res) => {
+export const getAdminById = (req, res) => {
   const { id } = req.params;
   if (!mongoose.isValidObjectId(id)) {
     return res.status(400).json({
@@ -61,7 +58,7 @@ const getAdminById = (req, res) => {
     }));
 };
 
-const createAdmin = async (req, res) => {
+export const createAdmin = async (req, res) => {
   const {
     firstName,
     lastName,
@@ -72,15 +69,14 @@ const createAdmin = async (req, res) => {
     password,
   } = req.body;
   try {
-    console.log('1');
-    // const alreadyExists = await Admin.findOne({ $or: [{ dni }, { email }] });
-    // if (alreadyExists) {
-    //   return res.status(400).json({
-    //     message: 'It already exists another admin with that Dni or Email',
-    //     data: req.body,
-    //     error: true,
-    //   });
-    // }
+    const alreadyExists = await Admin.findOne({ $or: [{ dni }, { email }] });
+    if (alreadyExists) {
+      return res.status(400).json({
+        message: 'It already exists another admin with that Dni or Email',
+        data: req.body,
+        error: true,
+      });
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
     const newAdmin = new Admin({
       firstName,
@@ -91,7 +87,6 @@ const createAdmin = async (req, res) => {
       city,
     });
     const admin = await newAdmin.save();
-    console.log('hola');
     const newUser = new User({
       email: req.body.email,
       password: hashedPassword,
@@ -99,7 +94,6 @@ const createAdmin = async (req, res) => {
       token: '',
     });
     await newUser.save();
-    console.log('5');
     return res.status(201).json({
       message: 'Admin created',
       data: admin,
@@ -114,7 +108,7 @@ const createAdmin = async (req, res) => {
   }
 };
 
-const updateAdmin = async (req, res) => {
+export const updateAdmin = async (req, res) => {
   const { id } = req.params;
   if (!mongoose.isValidObjectId(id)) {
     return res.status(400).json({
@@ -195,7 +189,7 @@ const updateAdmin = async (req, res) => {
     }));
 };
 
-const deleteAdmin = async (req, res) => {
+export const deleteAdmin = async (req, res) => {
   const { id } = req.params;
   if (!mongoose.isValidObjectId(id)) {
     return res.status(400).json({
@@ -204,33 +198,21 @@ const deleteAdmin = async (req, res) => {
       error: true,
     });
   }
-  await Users.findOneAndDelete({ email: admin.email });
-  return Admin.findByIdAndDelete(id)
-    .then((adminDeleted) => {
-      if (!adminDeleted) {
-        return res.status(404).json({
-          message: `Admin with ID (${id}) was not found`,
-          data: undefined,
-          error: true,
-        });
-      }
-      return res.status(200).json({
-        message: 'Admin deleted',
-        data: adminDeleted,
-        error: false,
+  try {
+    const admin = await Admin.findByIdAndDelete(id);
+    await User.findOneAndDelete({ email: admin.email });
+    if (!admin) {
+      throw new APIError({
+        message: `Admin with ID (${id}) was not found`,
+        data: admin,
+        status: 404,
       });
-    })
-    .catch((error) => res.status(500).json({
-      message: 'An error has ocurred',
-      data: undefined,
-      error,
-    }));
-};
-
-module.exports = {
-  updateAdmin,
-  deleteAdmin,
-  getAllAdmins,
-  getAdminById,
-  createAdmin,
+    }
+    return res.status(204).send();
+  } catch (error) {
+    return res.status(error.status || 500).json({
+      message: error.message || error,
+      error: true,
+    });
+  }
 };

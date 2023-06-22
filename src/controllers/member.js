@@ -1,6 +1,7 @@
-const mongoose = require('mongoose');
-const Member = require('../models/member');
-
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
+import Member from '../models/member';
+import User from '../models/user';
 const updateMember = (req, res) => {
   const { id } = req.params;
   const {
@@ -155,43 +156,60 @@ const getMembersById = (req, res) => {
     .catch((error) => res.status(500).json({ message: 'An error ocurred', error }));
 };
 
-const createMembers = (req, res) => {
+const createMembers = async (req, res) => {
   const { id } = req.params;
-  Member.findOne({ $or: [{ dni: req.body.dni }, { email: req.body.email }] })
-    .then((repeated) => {
-      if (repeated && Object.values(repeated.toObject())[0].toString() !== id) {
-        return res.status(400).json({
-          message: 'Email or Dni already exists',
-          error: true,
-        });
-      }
-      const {
-        firstName, lastName, dni, phone, email, password, city, birthDay, postalCode, isActive,
-        membership,
-      } = req.body;
-      return Member.create({
-        firstName,
-        lastName,
-        dni,
-        phone,
-        email,
-        password,
-        city,
-        birthDay,
-        postalCode,
-        isActive,
-        membership,
-      })
-        .then((result) => res.status(201).json({
-          message: 'Member Created!',
-          data: result,
-          error: false,
-        }));
-    })
-    .catch((error) => res.status(500).json({
-      message: 'Error!',
-      error,
-    }));
+  const {
+    firstName, lastName, dni, phone, email, password, city, birthDay, postalCode, isActive,
+    membership,
+  } = req.body;
+
+  try {
+    const existingMember = await Member.findOne({ $or: [{ dni: req.body.dni }, { email: req.body.email }] })
+
+    if (existingMember && Object.values(existingMember.toObject())[0].toString() !== id) {
+      return res.status(400).json({
+        message: 'Email or Dni already exists',
+        error: true,
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newMember = new Member({
+      firstName,
+      lastName,
+      dni,
+      phone,
+      email,
+      city,
+      birthDay,
+      postalCode,
+      isActive,
+      membership,
+    });
+
+    const member = newMember.save();
+
+    const newUser = new User({
+      email: email,
+      password: hashedPassword,
+      role: 'MEMBER',
+      token: '',
+    });
+
+    await newUser.save();
+
+    return res.status(201).json({
+      message: 'Member created!',
+      data: member,
+      error: false,
+    });
+  } catch (err) {
+      return res.status(400).json({
+        message: 'Member could not be created',
+        err,
+        error: true,
+      });
+  }
 };
 
 module.exports = {

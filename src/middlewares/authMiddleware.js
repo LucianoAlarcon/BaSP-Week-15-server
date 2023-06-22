@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import Users from '../models/Users';
+import Users from '../models/user';
 
 const checkAuth = (roles) => async (req, res, next) => {
   try {
@@ -17,7 +17,8 @@ const checkAuth = (roles) => async (req, res, next) => {
   } catch (error) {
     res.status(401).json({
       message: 'Unauthorize',
-      data: error.toString(),
+      data: undefined,
+      error: error.toString(),
     });
   }
 };
